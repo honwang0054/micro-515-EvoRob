@@ -79,6 +79,7 @@ class ES(EA):
         if self.current_gen % self.log_every == 0:
             print(f"Best in generation {self.current_gen: 3d}: {function_values[best_index]:.2f}\n"
                   f"Best fitness so far   : {self.f_best_so_far:.2f}\n"
+                  f"Best x so far         : {self.x_best_so_far}\n"
                   f"Mean pop fitness      : {np.mean(self.f):.2f} +- {np.std(self.f):.2f}\n"
                   f"Sigma: {self.current_sigma:.2f} \n"
             )
@@ -89,59 +90,42 @@ class ES(EA):
     def initialise_x0(self):
         """Initialises the first population."""
         # TODO: generate the initial population mean vector (current_mean)
-        mean_vector = ...
+        mean_vector = np.random.uniform(self.min, self.max, size=(self.n_pop, self.n_params))
         return mean_vector
 
     def update_sigma(self):
         """Update the perturbation strength (sigma)."""
         # TODO: implement a decay of the sigma value over generations, ensuring it does not go below min_sigma
-        self.current_sigma = ...
+        self.current_sigma = max(self.current_sigma * self.sigma_decay_rate, self.min_sigma)
 
     def sort_and_select_parents(self, population, fitness, num_parents):
         """Sorts the population based on fitness and selects the top individuals as parents."""
         # TODO: sort the population and fitness based on fitness values, and select the top num_parents individuals as parents
-        parent_population = ...
-        parent_fitness = ...
+        parent_population = population[np.argsort(fitness)[::-1][:num_parents]]
+        parent_fitness = fitness[np.argsort(fitness)[::-1][:num_parents]]
 
         return parent_population, parent_fitness
 
     def update_population_mean(self, parent_population, parent_fitness, rank: bool = False):
-        """Updates the population mean based on the selected parents and their fitness."""
-        # TODO: compute the new population mean as a weighted average of the parent population, where the weights are based on the parent fitness
-        # (you can use rank or raw fitness values)
-        normed_parents_fitness = ...
-        self.current_mean = ...
+        """Updates the populationmean based on the selected parents and their fitness."""
+        # Use rank-based fitness to avoid extreme fitness values dominating the mean
+        ranks = np.arange(len(parent_fitness))[::-1]
+        
+        # CMA-ES style rank weighting
+        weights = np.log(len(parent_fitness) + 0.5) - np.log(np.arange(1, len(parent_fitness) + 1))
+        
+        # Add a learning rate multiplier (e.g. 0.5) so it doesn't move 100% to the new mean
+        # This keeps a portion of the old mean, providing inertia
+        learning_rate = 0.5
+        weights = weights / np.sum(weights)
+        
+        new_mean = np.sum(parent_population * weights[:, None], axis=0)
+        self.current_mean = (1 - learning_rate) * np.array(self.current_mean) + learning_rate * new_mean
 
     def generate_mutated_offspring(self, population_size):
         """Generates a new population by adding Gaussian noise to the current mean."""
         # TODO: generate a new population by adding Gaussian noise to the current mean, where the noise is scaled by the current sigma value
-        perturbation = ...
-        mutated_population = ...
+        perturbation = np.random.randn(population_size, self.n_params) * self.current_sigma
+        mutated_population = self.current_mean + perturbation
 
         return mutated_population
-
-    def sort_and_select_parents(self, population, fitness, num_parents):
-        # TODO
-        parent_population = ...
-        parent_fitness = ...
-        return parent_population, parent_fitness
-
-    def update_population_mean(self, parent_population, parent_fitness):
-        # TODO
-        # Normalise parent fitness scores
-        normed_parents_fitness = ...
-
-        # Compute population weighted to the normed fitness scores
-        weighted_parents_population = ...
-
-        # Calculate the sum of weighted parents population
-        updated_mean_vector = ...
-
-        return updated_mean_vector
-
-    def update_sigma(self):
-        #TODO
-        minimum_sigma = ...
-        sigma = self.current_sigma
-        param_size = self.n_params
-        return sigma

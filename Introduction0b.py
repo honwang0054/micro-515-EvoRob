@@ -32,7 +32,7 @@ class IdentityController(Controller):
 class PassiveWalkerWorld(World):
 
     def __init__(self):
-        self.n_params = 6
+        self.n_params = 3
         self.temp_dir = TemporaryDirectory()
         self.world_file = join(self.temp_dir.name, "PassiveWalkerEnv.xml")
         self.base_xml_path = join(ROOT_DIR, "evorob", "world", "robot", "assets", "walker_world.xml")
@@ -67,19 +67,19 @@ class PassiveWalkerWorld(World):
         return env
 
     def geno2pheno(self, genotype):
-        up_l_leg, low_l_leg, l_foot, up_r_leg, low_r_leg, r_foot = genotype
+        up_leg, low_leg, foot = genotype
 
         # Define the 3D coordinates of the relative tree structure
         right_hip_xyz   = np.array([0         ,-0.05    , 0      ])
-        right_knee_xyz  = np.array([0         , 0       ,-up_r_leg ]) + right_hip_xyz
-        right_ankle_xyz = np.array([0         , 0       ,-low_r_leg]) + right_knee_xyz
-        right_toe1_xyz  = np.array([r_foot      ,-0.025   , 0      ]) + right_ankle_xyz
+        right_knee_xyz  = np.array([0         , 0       ,-up_leg ]) + right_hip_xyz
+        right_ankle_xyz = np.array([0         , 0       ,-low_leg]) + right_knee_xyz
+        right_toe1_xyz  = np.array([foot      ,-0.025   , 0      ]) + right_ankle_xyz
         right_toe2_xyz  = np.array([0         , 0.06    , 0      ]) + right_toe1_xyz
 
         left_hip_xyz    = np.array([0         , 0.05    , 0       ])
-        left_knee_xyz   = np.array([0         , 0       ,-up_l_leg  ]) + left_hip_xyz
-        left_ankle_xyz  = np.array([0         , 0       ,-low_l_leg ]) + left_knee_xyz
-        left_toe1_xyz   = np.array([l_foot      , 0.025   , 0       ]) + left_ankle_xyz
+        left_knee_xyz   = np.array([0         , 0       ,-up_leg  ]) + left_hip_xyz
+        left_ankle_xyz  = np.array([0         , 0       ,-low_leg ]) + left_knee_xyz
+        left_toe1_xyz   = np.array([foot      , 0.025   , 0       ]) + left_ankle_xyz
         left_toe2_xyz   = np.array([0         ,-0.06    , 0       ]) + left_toe1_xyz
 
         points = np.vstack([right_hip_xyz, right_knee_xyz, right_ankle_xyz, right_toe1_xyz, right_toe2_xyz,
@@ -100,7 +100,7 @@ class PassiveWalkerWorld(World):
         )
         return points, connectivity_mat
 
-    def evaluate_individual(self, genotype, n_sim_steps=2000):
+    def evaluate_individual(self, genotype, n_sim_steps=1000):
         try:
             self.update_robot_xml(genotype)
             env = self.create_env()
@@ -127,23 +127,22 @@ def main():
 
     #%% Understanding the world
     # TODO: can you improve the genotype - you will also need to modify the PassiveWalkerWorld class!
-    genotype = [0.3, 0.2, 0.1, 0.3, 0.2, 0.1]
+    genotype = [0.3, 0.2, 0.1]
     world.visualise_individual(genotype)
 
     results_dir = join(ROOT_DIR, "results", ENV_NAME, "EA")
     results_dir = get_distinct_filename(results_dir)
 
-    # TODO: play with the hyperparameters - these are far from optimal!
     opts = ES_opts.copy()
-    opts["min"] = 0
-    opts["max"] = 0.5
-    opts["num_parents"] = 20
-    opts["num_generations"] = 100
-    opts["mutation_sigma"] = 0.6
-    opts["min_sigma"] = 0.3
-    opts["sigma_decay_rate"] = 0.1
+    opts["min"] = 0.1
+    opts["max"] = 0.6
+    opts["num_parents"] = 30
+    opts["num_generations"] = 250
+    opts["mutation_sigma"] = 0.05
+    opts["min_sigma"] = 0.01
+    opts["sigma_decay_rate"] = 1.0
 
-    population_size = 100
+    population_size = 150
 
     ea = ES(population_size, n_parameters, opts, log_every=2, output_dir=results_dir)
 
@@ -152,9 +151,9 @@ def main():
         pop = ea.ask()
         fitnesses_gen = np.empty(ea.n_pop)
         for index, genotype in enumerate(pop):
-            fit_ind = world.evaluate_individual(genotype)
+            fit_ind = world.evaluate_individual(genotype, n_sim_steps=2000)
             fitnesses_gen[index] = fit_ind
-        ea.tell(pop, fitnesses_gen)
+        ea.tell(pop, fitnesses_gen, save_checkpoint=True)
 
     #%% visualise
     checkpoint = get_last_checkpoint_dir(results_dir)

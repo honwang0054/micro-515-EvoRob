@@ -37,10 +37,34 @@
 
     <!-- Free-falling objects -->
     <!-- TODO -->
+    <body name="free_falling_box" pos="1 0 2">
+      <freejoint/>
+      <geom name="free_falling_box" type="box" size="0.25 0.25 0.25" rgba="0.8 0.4 0.1 1" mass="0.2"/>
+    </body>
 
     <!-- Simple 2-link robot arm -->
-    <!-- TODO -->
+    <body name="arm_base" pos="-0.8 0 0.1">
+      <geom name="base_geom" type="cylinder" size="0.08 0.1" material="robot" mass="1.0"/>
+
+      <!-- Link 1 rotates around vertical axis -->
+      <body name="link1" pos="0 0 0.1">
+        <joint name="shoulder" type="hinge" axis="1 0 0" range="-120 120" damping="1.5"/>
+        <geom name="link1_geom" type="capsule" fromto="0 0 0 0.45 0 0" size="0.04" material="robot" mass="0.5"/>
+
+        <!-- Link 2 rotates in the same plane -->
+        <body name="link2" pos="0.45 0 0">
+          <joint name="elbow" type="hinge" axis="0 0 1" range="-150 150" damping="1.0"/>
+          <geom name="link2_geom" type="capsule" fromto="0 0 0 0.35 0 0" size="0.035" material="robot" mass="0.35"/>
+          <site name="ee_site" pos="0.35 0 0" size="0.02" rgba="0.2 0.9 0.9 1"/>
+        </body>
+      </body>
+    </body>
 
   </worldbody>
+
+  <actuator>
+    <motor name="shoulder_motor" joint="shoulder" gear="40" ctrlrange="-1 1"/>
+    <motor name="elbow_motor" joint="elbow" gear="30" ctrlrange="-1 1"/>
+  </actuator>
 
 </mujoco>
