@@ -104,7 +104,9 @@ class AntFlatEnvironment(MujocoEnv):
         # - velocity: self.data.qvel.flatten() (14 values)
         # This gives 27 total dimensions, making the task translation-invariant
         # Hint: Use np.concatenate() to combine both arrays
-        raise NotImplementedError("TODO: Implement observation function")
+        position = self.data.qpos[2:].flatten()
+        velocity = self.data.qvel.flatten()
+        return np.concatenate([position, velocity])
 
     def _get_rew(self, x_velocity: float, action):
         # TODO: Implement reward function with three components:
@@ -113,11 +115,34 @@ class AntFlatEnvironment(MujocoEnv):
         # 3. ctrl_cost = ...
         # Final reward is the sum of these three components.
         # Return: (reward, reward_info_dict)
-        raise NotImplementedError("TODO: Implement reward function")
+        forward_reward = x_velocity * 1.0
+        healthy_reward = 1.0
+        ctrl_cost = 0.5 * np.sum(np.square(action))
+        
+        reward = forward_reward + healthy_reward - ctrl_cost
+        reward_info_dict = {
+            "reward_forward": forward_reward,
+            "reward_survive": healthy_reward,
+            "reward_ctrl": -ctrl_cost,
+            "forward_reward": forward_reward,
+            "healthy_reward": healthy_reward,
+            "ctrl_cost": ctrl_cost,
+        }
+        return reward, reward_info_dict
 
     def _get_termination(self):
         # TODO: Robot should terminate when:
         # - Torso height is below 0.26 or above 1.0
         # Return True if NOT healthy (i.e., should terminate)
+<<<<<<< HEAD
         # Hint: Use self.state_vector() to get current state.
         raise NotImplementedError("TODO: Implement termination function")
+=======
+        # Hint: Use self.state_vector() to get current state
+        state = self.state_vector()
+        is_finite = np.isfinite(state).all()
+        z_height = state[2]
+        
+        is_healthy = is_finite and (0.26 <= z_height <= 1.0)
+        return not is_healthy
+>>>>>>> a0099a5 (Add cluster submit files)

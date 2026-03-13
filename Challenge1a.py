@@ -432,12 +432,12 @@ def evaluate_checkpoint(
 
 
 if __name__ == "__main__":
-    test_exercise_implementation()
+    # test_exercise_implementation()
 
     # Uncomment to run full evolution:
     run_evolution_neural_controller(
-        num_generations=100,
-        population_size=10,
+        num_generations=300,
+        population_size=250,
         ckpt_interval=5,
         checkpoint_path=None,
         run_evaluation=True,

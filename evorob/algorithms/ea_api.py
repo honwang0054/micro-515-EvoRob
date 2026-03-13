@@ -27,11 +27,33 @@ class EvoAlgAPI(EA):
             output_dir: Directory for saving checkpoints
             **kwargs: Additional arguments for the EA framework
         """
-        # TODO: Initialize your chosen EA framework here
         self.n_params = n_params
         self.n_gen = num_generations
         self.population_size = population_size
+        self.framework = kwargs.get("framework", "cma")
         
+        if self.framework == "cma":
+            import cma
+            self.es = cma.CMAEvolutionStrategy(self.n_params * [0.0], 0.1, {'popsize': self.population_size})
+        elif self.framework == "pyribs":
+            from ribs.archives import GridArchive
+            from ribs.emitters import GaussianEmitter
+            from ribs.optimizers import Optimizer
+            self.archive = GridArchive(solution_dim=self.n_params, dims=[1], ranges=[(-1.0, 1.0)])
+            self.emitters = [GaussianEmitter(self.archive, x0=np.zeros(self.n_params), sigma=0.5, batch_size=self.population_size)]
+            self.optimizer = Optimizer(self.archive, self.emitters)
+        elif self.framework == "evosax":
+            import jax
+            from evosax.algorithms import CMA_ES
+            self.strategy = CMA_ES(popsize=self.population_size, num_dims=self.n_params)
+            self.es_params = self.strategy.default_params
+            self.es_state = self.strategy.initialize(jax.random.PRNGKey(0), self.es_params)
+        elif self.framework == "evojax":
+            from evojax.algorithms import PGPE
+            self.solver = PGPE(pop_size=self.population_size, param_size=self.n_params, optimizer='adam', center_learning_rate=0.01, stdev_learning_rate=0.1)
+        else:
+            raise ValueError(f"Unknown framework: {self.framework}")
+            
         # % bookkeeping for base EA
         self.directory_name = output_dir
         self.current_gen = 0
@@ -42,12 +64,6 @@ class EvoAlgAPI(EA):
         self.x = None
         self.f = None
 
-        raise NotImplementedError(
-            "TODO: Initialize your chosen EA framework.\n"
-            "Recommended: pip install cma, then import cma and create CMAEvolutionStrategy.\n"
-            "See https://github.com/CMA-ES/pycma for documentation."
-        )
-
     def ask(self) -> np.ndarray:
         """Sample population from the algorithm.
 
@@ -55,13 +71,21 @@ class EvoAlgAPI(EA):
             population: Array of shape (population_size, n_params)
                        Each row is a candidate solution
         """
-        # TODO: Get new population from your EA
-        # Make sure the returned array has shape (population_size, n_params)
-
-        raise NotImplementedError(
-            "TODO: Implement ask() to sample new population.\n"
-            "This should return an array of shape (population_size, n_params)."
-        )
+        if self.framework == "cma":
+            self._current_pop = self.es.ask()
+            return np.array(self._current_pop)
+        elif self.framework == "pyribs":
+            self._current_pop = self.optimizer.ask()
+            return np.array(self._current_pop)
+        elif self.framework == "evosax":
+            import jax
+            rng = jax.random.PRNGKey(self.current_gen)
+            x, self.es_state = self.strategy.ask(rng, self.es_state, self.es_params)
+            self._current_pop = np.array(x)
+            return self._current_pop
+        elif self.framework == "evojax":
+            self._current_pop = np.array(self.solver.ask())
+            return self._current_pop
 
     def tell(self, population: np.ndarray, fitnesses: np.ndarray, save_checkpoint: bool = False) -> None:
         """Update the algorithm with evaluated population.
@@ -72,10 +96,18 @@ class EvoAlgAPI(EA):
                       Higher is better (maximization)
             save_checkpoint: Whether to save checkpoint after update
         """
-        # TODO: Update your EA with the evaluated population
-        # Note: Some algorithms minimize, others maximize.
-        # Adjust accordingly (negate fitnesses if needed).
-        
+        if self.framework == "cma":
+            self.es.tell(self._current_pop, -fitnesses)
+        elif self.framework == "pyribs":
+            measures = np.zeros((self.population_size, 1))
+            self.optimizer.tell(fitnesses, measures)
+        elif self.framework == "evosax":
+            import jax.numpy as jnp
+            self.es_state = self.strategy.tell(jnp.array(population), -jnp.array(fitnesses), self.es_state, self.es_params)
+        elif self.framework == "evojax":
+            import jax.numpy as jnp
+            self.solver.tell(jnp.array(fitnesses))
+            
         # After updating the EA, do bookkeeping for checkpointing:
         self.full_f.append(fitnesses)
         self.full_x.append(population)
@@ -91,9 +123,3 @@ class EvoAlgAPI(EA):
         if save_checkpoint:
             self.save_checkpoint()
         self.current_gen += 1
-
-        raise NotImplementedError(
-            "TODO: Implement tell() to update the EA.\n"
-            "Pass the population and their fitness values to update the search distribution.\n"
-            "Don't forget to add the bookkeeping code shown above for checkpointing!"
-        )
