@@ -134,10 +134,6 @@ class AntFlatEnvironment(MujocoEnv):
         # TODO: Robot should terminate when:
         # - Torso height is below 0.26 or above 1.0
         # Return True if NOT healthy (i.e., should terminate)
-<<<<<<< HEAD
-        # Hint: Use self.state_vector() to get current state.
-        raise NotImplementedError("TODO: Implement termination function")
-=======
         # Hint: Use self.state_vector() to get current state
         state = self.state_vector()
         is_finite = np.isfinite(state).all()
@@ -145,4 +141,3 @@ class AntFlatEnvironment(MujocoEnv):
         
         is_healthy = is_finite and (0.26 <= z_height <= 1.0)
         return not is_healthy
->>>>>>> a0099a5 (Add cluster submit files)
