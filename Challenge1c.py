@@ -6,7 +6,11 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import VecNormalize, VecVideoRecorder, DummyVecEnv
 
+<<<<<<< HEAD
 from evorob.world.envs.ant_flat import AntFlatEnvironment
+=======
+from evorob.world.envs.ant_flat_sol import AntFlatEnvironment
+>>>>>>> origin/challenge1
 
 """ 
     Controller optimisation: Ant flat terrain

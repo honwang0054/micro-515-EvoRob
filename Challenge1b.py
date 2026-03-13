@@ -1,4 +1,5 @@
 import datetime
+<<<<<<< HEAD
 import os
 from pathlib import Path
 from typing import Optional
@@ -14,6 +15,16 @@ from evorob.utils.filesys import get_last_checkpoint_dir
 >>>>>>> a0099a5 (Add cluster submit files)
 from evorob.world.ant_world import AntFlatWorld
 from evorob.world.robot.controllers.sinoid import OscillatoryController
+=======
+from pathlib import Path
+from typing import Optional
+
+import numpy as np
+
+from evorob.algorithms.ea_api_sol import EvoAlgAPI
+from evorob.world.ant_world import AntFlatWorld
+from evorob.world.robot.controllers.sinoid_sol import OscillatoryController
+>>>>>>> origin/challenge1
 
 
 def test_exercise_implementation():
@@ -89,11 +100,16 @@ def test_exercise_implementation():
     print("\nUncomment the lines below to start evolutionary training.")
 
 
+<<<<<<< HEAD
 """
+=======
+""" 
+>>>>>>> origin/challenge1
     Controller optimisation: Ant flat terrain
 """
 
 
+<<<<<<< HEAD
 def plot_fitness(full_f, output_dir):
     """Save a fitness-over-generations plot to the checkpoint directory."""
     import matplotlib.pyplot as plt
@@ -142,13 +158,18 @@ def plot_fitness(full_f, output_dir):
     print(f"Fitness plot saved to: {plot_path}")
 
 
+=======
+>>>>>>> origin/challenge1
 def run_evolution_oscillatory_controller(
     num_generations: int,
     population_size: int,
     ckpt_interval: int,
     checkpoint_path: Optional[str] = None,
     run_evaluation: bool = True,
+<<<<<<< HEAD
     compute_score: bool = True,
+=======
+>>>>>>> origin/challenge1
     random_seed: int = 42,
 ) -> None:
     """Run evolutionary optimization for robot controller."""
@@ -165,9 +186,13 @@ def run_evolution_oscillatory_controller(
         checkpoint_path = f"results/{dt_str}_oscillatory_controller_ckpts"
     else:
         # If path is relative or absolute, just add prefix
+<<<<<<< HEAD
         checkpoint_path = str(
             Path(checkpoint_path).parent / f"{dt_str}_{Path(checkpoint_path).name}"
         )
+=======
+        checkpoint_path = str(Path(checkpoint_path).parent / f"{dt_str}_{Path(checkpoint_path).name}")
+>>>>>>> origin/challenge1
 
     ckpt_dir = Path(checkpoint_path)
     ckpt_dir.mkdir(parents=True, exist_ok=True)
@@ -188,9 +213,13 @@ def run_evolution_oscillatory_controller(
             fitness[i] = world.evaluate_individual(individual)
 
         # Tell EA the results
+<<<<<<< HEAD
         save_checkpoint = (generation % ckpt_interval == 0) or (
             generation == num_generations - 1
         )
+=======
+        save_checkpoint = (generation % ckpt_interval == 0) or (generation == num_generations - 1)
+>>>>>>> origin/challenge1
         ea.tell(population, fitness, save_checkpoint=save_checkpoint)
 
         # Logging metrics
@@ -210,6 +239,7 @@ def run_evolution_oscillatory_controller(
     if checkpoint_path:
         print(f"Checkpoints saved to {ckpt_dir}")
 
+<<<<<<< HEAD
     # Save fitness plot
     plot_fitness(ea.full_f, ckpt_dir)
 
@@ -220,6 +250,8 @@ def run_evolution_oscillatory_controller(
             output_dir=str(ckpt_dir),
         )
 
+=======
+>>>>>>> origin/challenge1
     if run_evaluation:
         # Evaluate the trained agent with the same env factory as training
         evaluation_env = world.create_env(render_mode="human")
@@ -250,6 +282,7 @@ def run_evolution_oscillatory_controller(
             evaluation_env.close()
 
 
+<<<<<<< HEAD
 def evaluate_checkpoint(
     checkpoint_dir: str,
     output_dir: str = "evaluation_output",
@@ -389,11 +422,21 @@ if __name__ == "__main__":
         num_generations=300,
         population_size=250, 
 >>>>>>> a0099a5 (Add cluster submit files)
+=======
+if __name__ == "__main__":
+    test_exercise_implementation()
+
+    # Uncomment to run full evolution:
+    run_evolution_oscillatory_controller(
+        num_generations=100,
+        population_size=10, 
+>>>>>>> origin/challenge1
         ckpt_interval=5,
         checkpoint_path=None,
         run_evaluation=True,
         random_seed=42,
     )
+<<<<<<< HEAD
 
     # ----------------------------------------------------------------
     # EVALUATION: Uncomment the lines below to evaluate your checkpoint
@@ -403,3 +446,5 @@ if __name__ == "__main__":
     # evaluate_checkpoint(
     #     checkpoint_dir="results/REPLACE_WITH_YOUR_CHECKPOINT_FOLDER",
     # )
+=======
+>>>>>>> origin/challenge1
