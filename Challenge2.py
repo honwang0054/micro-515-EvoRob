@@ -4,6 +4,7 @@ from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+import wandb
 
 from evorob.algorithms.nsga import NSGAII
 from evorob.world.ant_multi_world import AntMultiWorld
@@ -292,6 +293,21 @@ def run_evolution_nsga(
         output_dir=ckpt_dir,
     )
 
+    wandb.init(
+        project="micro-515-EvoRob",
+        config={
+            "challenge": "2",
+            "algorithm": "NSGA-II",
+            "population_size": population_size,
+            "num_generations": num_generations,
+            "mutation_prob": 0.3,
+            "crossover_prob": 0.5,
+            "hidden_size": 16,
+            "n_params": num_params,
+            "random_seed": random_seed,
+        },
+    )
+
     # Evolution loop
     fitness_history = []
     best_overall_fitness = -np.inf
@@ -333,6 +349,15 @@ def run_evolution_nsga(
         best_obj1 = np.max(multi_fitness[:, 0])
         best_obj2 = np.max(multi_fitness[:, 1])
 
+        wandb.log({
+            "generation": generation + 1,
+            "best/objective1_flat": best_obj1,
+            "best/objective2_ice": best_obj2,
+            "mean/objective1_flat": mean_fitness_obj1,
+            "mean/objective2_ice": mean_fitness_obj2,
+            "best_overall/objective1_flat": best_overall_fitness,
+        }, step=generation + 1)
+
         # Progress bar
         progress = (generation + 1) / num_generations
         bar_length = 50
@@ -350,6 +375,8 @@ def run_evolution_nsga(
             f"     Mean:     Objective 1={mean_fitness_obj1:7.2f}  Objective 2={mean_fitness_obj2:7.2f}"
         )
         print()
+
+    wandb.finish()
 
 
 def replay_checkpoint(checkpoint_path: str):
@@ -451,23 +478,23 @@ def plot_pareto_fronts_from_checkpoint(checkpoint_dir: str):
 
 if __name__ == "__main__":
     # Run unit tests first
-    test_exercise_implementation()
+    # test_exercise_implementation()
 
-    # Uncomment to run full NSGA-II evolution:
-    run_evolution_nsga(
-        num_generations=100,
-        population_size=10,
-        ckpt_interval=5,
-        checkpoint_path=None,
-        random_seed=42,
-    )
+    # Run full NSGA-II evolution:
+    # run_evolution_nsga(
+    #     num_generations=1000,
+    #     population_size=300,
+    #     ckpt_interval=10,
+    #     checkpoint_path=None,
+    #     random_seed=42,
+    # )
 
     # Uncomment to replay your checkpoint
-    # replay_checkpoint(
-    #     checkpoint_path="./results/nsga_multi_terrain_ckpt/99"
-    # )
+    replay_checkpoint(
+        checkpoint_path="./results/20260317_150911_nsga_ckpts/70"
+    )
 
     # Uncomment to plot Pareto fronts from checkpoint
-    # plot_pareto_fronts_from_checkpoint(
-    #     checkpoint_dir="./results/nsga_multi_terrain_ckpt/99"
-    # )
+    plot_pareto_fronts_from_checkpoint(
+        checkpoint_dir="./results/20260317_150911_nsga_ckpts"
+    )

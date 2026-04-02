@@ -1,0 +1,34 @@
+wandb: Loading settings from /home/honwang/micro-515-EvoRob/wandb/settings
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /home/honwang/.netrc.
+wandb: Currently logged in as: xiaopp20000054 to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run yjbmbze0
+wandb: Tracking run with wandb version 0.25.0
+wandb: Run data is saved locally in /home/honwang/micro-515-EvoRob/wandb/run-20260317_150913-yjbmbze0
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run resilient-music-2
+wandb: ⭐️ View project at https://wandb.ai/xiaopp20000054/micro-515-EvoRob
+wandb: 🚀 View run at https://wandb.ai/xiaopp20000054/micro-515-EvoRob/runs/yjbmbze0
+wandb: updating run metadata
+wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml
+wandb: uploading output.log
+wandb: 
+wandb: Run history:
+wandb:         best/objective1_flat ▁▁▁▁▁▁▁▂▃▄▃▆▅▆▅▆▅▅▅▆▆▅▅▆▆▇▆▇▆▆▇▇█▆▆▆▇▆▇▆
+wandb:          best/objective2_ice ▁▁▁▁▁▂▃▃▄▄▅▅▅▆▆▆▆▇▆▆▆█▆▇▇▇▆▇▇▇▇▇██▇▇▇▇▇▇
+wandb: best_overall/objective1_flat ▁▁▂▃▄▅▅▅▅▅▅▅▆▆▆▆▆▆▆▆▆▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇███
+wandb:                   generation ▁▁▁▂▂▃▃▃▃▃▃▃▃▃▄▄▄▄▄▄▅▅▅▅▅▅▅▅▅▆▆▆▆▆▆▇▇███
+wandb:         mean/objective1_flat ▁▃▃▃▄▆▅▆▆▆▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇██▇█████▇██▇
+wandb:          mean/objective2_ice ▁▂▂▁▂▄▄▅▅▅▆▆▆▆▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇█▇████
+wandb: 
+wandb: Run summary:
+wandb:         best/objective1_flat 209.75558
+wandb:          best/objective2_ice 497.27637
+wandb: best_overall/objective1_flat 402.22729
+wandb:                   generation 1000
+wandb:         mean/objective1_flat 33.02502
+wandb:          mean/objective2_ice 90.6708
+wandb: 
+wandb: 🚀 View run resilient-music-2 at: https://wandb.ai/xiaopp20000054/micro-515-EvoRob/runs/yjbmbze0
+wandb: ⭐️ View project at: https://wandb.ai/xiaopp20000054/micro-515-EvoRob
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260317_150913-yjbmbze0/logs

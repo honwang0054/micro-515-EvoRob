@@ -99,26 +99,27 @@ class AntFlatEnvironment(MujocoEnv):
         return observation, reward, terminated, False, info
 
     def _get_obs(self):
-        # TODO: Return observation as concatenation of:
-        # - position EXCLUDING x,y: self.data.qpos[2:].flatten() (13 values)
-        # - velocity: self.data.qvel.flatten() (14 values)
-        # This gives 27 total dimensions, making the task translation-invariant
-        # Hint: Use np.concatenate() to combine both arrays
-        raise NotImplementedError("TODO: Implement observation function")
+        return np.concatenate([
+            self.data.qpos[2:].flatten(),
+            self.data.qvel.flatten(),
+        ])
 
     def _get_rew(self, x_velocity: float, action):
-        # TODO: Implement reward function with three components:
-        # 1. forward_reward = x_velocity * forward_reward_weight (weight=1.0)
-        # 2. healthy_reward = healthy_reward_weight (weight=1.0)
-        # 3. ctrl_cost = ctrl_cost_weight * sum of squared actions (weight=0.5)
-        # Final reward = forward_reward + healthy_reward - ctrl_cost
-        # Return: (reward, reward_info_dict)
-        raise NotImplementedError("TODO: Implement reward function")
+        forward_reward = 1.0 * x_velocity
+        healthy_reward = 1.0
+        ctrl_cost = 0.5 * np.sum(np.square(action))
+
+        reward = forward_reward + healthy_reward - ctrl_cost
+        reward_info = {
+            "forward_reward": forward_reward,
+            "healthy_reward": healthy_reward,
+            "ctrl_cost": ctrl_cost,
+        }
+        return reward, reward_info
 
     def _get_termination(self):
-        # TODO: Robot should terminate when:
-        # - Any value in state is not finite (check with np.isfinite(state).all())
-        # - Torso height (state[2]) is below 0.26 or above 1.0
-        # Return True if NOT healthy (i.e., should terminate)
-        # Hint: Use self.state_vector() to get current state
-        raise NotImplementedError("TODO: Implement termination function")
+        state = self.state_vector()
+        is_finite = np.isfinite(state).all()
+        torso_height = state[2]
+        is_healthy = is_finite and 0.26 <= torso_height <= 1.0
+        return not is_healthy
